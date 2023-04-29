@@ -3,28 +3,31 @@
 #include "parser.h"
 #include "tokenizer.h"
 
-reg xorFunction(int operand1, int operand2){ // xor function
-    return operand1 ^ operand2;
+
+reg* xorFunction(reg* operand1, reg* operand2){ // xor function
+    reg* new_reg = createRegDefault();
+    // TODO: xor operands and store it in new_reg - do this for all binary-unary funcs
+    return new_reg;
 }
-reg lsFunction(int operand, int shift_amount){ // ls function
+reg* lsFunction(reg* operand, reg* shift_amount){ // ls function
     return operand << shift_amount;
 }
-reg rsFunction(int operand, int shift_amount){ // rs function
+reg* rsFunction(reg* operand, reg* shift_amount){ // rs function
     return operand >> shift_amount;
 }
-reg lrFunction(int operand, int rotate_amount){ // lr function
+reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
     return (operand << rotate_amount)|(operand >> (64 - rotate_amount));
 }
-reg rrFunction(int operand, int rotate_amount){ // rr function
+reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
     return (operand >> rotate_amount)|(operand << (64 - rotate_amount));
 }
 
-reg parseBinaryFunction(const char* operand_symbol){ // binary functions
-    int result;
+reg* parseBinaryFunction(const char* operand_symbol){ // binary functions
+    reg* result;
     matchToken(LEFT_PAREN);
-    int operand1 = parseBitwiseOrExpression();
+    reg* operand1 = parseBitwiseOrExpression();
     matchToken(SEPARATOR);
-    int operand2 = parseBitwiseOrExpression();
+    reg* operand2 = parseBitwiseOrExpression();
     matchToken(RIGHT_PAREN);
 
     if(strncmp(operand_symbol,"xor",3) == 0){
@@ -48,16 +51,17 @@ reg parseBinaryFunction(const char* operand_symbol){ // binary functions
 
 }
 
-reg parseUnaryFunction(){ // not function
+reg* parseUnaryFunction(){ // not function
     matchToken(LEFT_PAREN);
 
-    int res = parseBitwiseOrExpression();
+    reg* res = parseBitwiseOrExpression();
     res = res ^ -1;
     matchToken(RIGHT_PAREN);
     return res;
 }
-reg parseFactor(){
+reg* parseFactor(){
     token t = current_token;
+    reg* new_reg = createRegDefault();
     if(t.type == INTEGER){
         matchToken(INTEGER);
         return atoll(t.symbol);
@@ -65,8 +69,14 @@ reg parseFactor(){
     else if(t.type == IDENTIFIER){
         matchToken(IDENTIFIER);
         variable* var = find(t.symbol);
-        return var!=NULL ? var->value : 0;
-        // if var is not in hashmap (not assigned previously), return 0, else return the value of var
+
+        if(var == NULL){
+            raiseTokenError();
+            return NULL;
+        }
+        else{
+            return var->var_reg;
+        }
     }
     else if(t.type == STR_OPERATOR_BINARY){
         const char* symbol = t.symbol;
@@ -79,7 +89,7 @@ reg parseFactor(){
     }
     else if (t.type == LEFT_PAREN){
         matchToken(LEFT_PAREN);
-        int res = parseBitwiseOrExpression();
+        reg* res = parseBitwiseOrExpression();
         matchToken(RIGHT_PAREN);
         return res;
     }
@@ -87,9 +97,9 @@ reg parseFactor(){
     raiseTokenError();
     return 1; 
 }
-reg parseTerm(){
+reg* parseTerm(){
 
-    int result = parseFactor();  // first factor to be multiplied
+    reg* result = parseFactor();  // first factor to be multiplied
     while(current_token.type == OPERATOR_MULTIPLICATIVE){
         token t = current_token;
         matchToken(OPERATOR_MULTIPLICATIVE);
@@ -103,8 +113,8 @@ reg parseTerm(){
     return result;
 }
 
-reg parseExpression(){
-    int result = parseTerm(); // first term to be multiplied or divided
+reg* parseExpression(){
+    reg* result = parseTerm(); // first term to be multiplied or divided
     while(token_index < token_count && current_token.type == OPERATOR_ADDITIVE){    // add or subtract (lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_ADDITIVE);
@@ -117,22 +127,21 @@ reg parseExpression(){
     }
     return result;
 }
-reg parseVariable(){  // returns the variable pointer
+reg* parseVariable(){  // returns the variable pointer
     token t = current_token;
     matchToken(IDENTIFIER);
     variable *var = find(t.symbol); // check if the variable is in the hashmap
     if(var == NULL){
-        // return insert(t.symbol); // if not, insert it and return the pointer
-        // TODO: should raiseError
-        raiseTokenError();
+        return insert(t.symbol)->var_reg; // if not, insert it and return the pointer
+
     }
     else{
-        return var; // if it is, return the pointer
+        return var->var_reg; // if it is, return the pointer
     }
 }
 
-reg parseBitwiseAndExpression(){
-    int result = parseExpression();  // first expression to be bitwise 'and'ed
+reg* parseBitwiseAndExpression(){
+    reg* result = parseExpression();  // first expression to be bitwise 'and'ed
     while (token_index < token_count && strcmp(current_token.symbol, "&")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_BITWISE);
@@ -140,8 +149,8 @@ reg parseBitwiseAndExpression(){
     }
     return result;
 };
-reg parseBitwiseOrExpression(){
-    int result = parseBitwiseAndExpression();  // first (bitwise and expression) to be bitwise 'or'ed
+reg* parseBitwiseOrExpression(){
+    reg* result = parseBitwiseAndExpression();  // first (bitwise and expression) to be bitwise 'or'ed
 
     while (token_index < token_count && strcmp(current_token.symbol, "|")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
@@ -150,13 +159,15 @@ reg parseBitwiseOrExpression(){
     }
     return result;
 };
+
+
 void parseAssignment(){
     bool justInitialized = find(current_token.symbol) == NULL;
-    variable* var = parseVariable(); // TODO: mustnt initialize var if there is error
+    reg* var = parseVariable();
     matchToken(ASSIGNMENT);
-    int response = parseBitwiseOrExpression();   // get the value of the (bitwise or expression)
+    reg* response = parseBitwiseOrExpression();   // get the value of the (bitwise or expression)
     if(!has_error && token_index == token_count){
-        var->value = response;  // assign the value of the (bitwise or expression) to the variable
+        storeInVar(var, response);
     }
     else{
         if(justInitialized) var->name = ""; // delete variable from the array if there is an error
@@ -169,9 +180,9 @@ void parseStatement(){  // two types of statements: assignment and bitwise or ex
         parseAssignment(); // assigns the rhs expr to lhs variable
     }
     else if(token_count != 0){
-        int result = parseBitwiseOrExpression(); // evaluates the (bitwise or expression)
+        reg* result = parseBitwiseOrExpression(); // evaluates the (bitwise or expression)
         if(!has_error && token_index == token_count){ // if there is no error and all tokens are consumed
-            printf("%lld\n", result);
+            printf("%d\n", result);
         }
         else{
             printf("Error!\n"); // if there is an error or there are unconsumed tokens

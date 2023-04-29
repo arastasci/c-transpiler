@@ -2,16 +2,20 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "reg.h"
 #ifndef HASH_H
 #define HASH_H
 
+
+
 typedef struct s_variable{
-    int value;
+    reg* var_reg;
     const char* name;
 } variable;
 
 void initializeHashMap();
 void deallocHashMap();
+
 variable* insert(const char* identifier);
 variable* find(const char* identifier);
 
