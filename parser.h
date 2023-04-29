@@ -2,12 +2,19 @@
 #define PARSE_H
 #include "tokenizer.h"
 #include "hash.h"
-#define int_64 long long int
 void parseStatement();
-int_64 parseExpression();
-int_64 parseTerm();
-int_64 parseFactor();
-int_64 parseBitwiseOrExpression();
-int_64 parseBitwiseAndExpression();
+int parseExpression();
+int parseTerm();
+int parseFactor();
+int parseBitwiseOrExpression();
+int parseBitwiseAndExpression();
+
+extern int current_reg_id;
+typedef struct reg {
+    reg_id;
+    reg_name;
+    value;
+} reg;
+
 
 #endif

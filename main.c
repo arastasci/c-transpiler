@@ -7,6 +7,8 @@ int main(){
     char input [258];
     initializeHashMap();
     allocateArrayMemory(); // allocate token array mem
+
+    current_reg_id = 0;
     printf("> ");
     while(fgets(input, 258, stdin) != NULL){
         has_error = false;
