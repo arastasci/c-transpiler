@@ -4,31 +4,75 @@
 #include "tokenizer.h"
 #include "file.h"
 
+const char* printFormat = "call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %s )";
+reg* makeBitshiftOperation(reg* operand, reg* shift_amount, const char* format){
+    // write result multiplied by factor2
+    // then result = the new reg
+    // <result> = <operation> <ty> <op1>, <op2>
+    reg* shifted_temp_result = createRegDefault();
+    fprintf(output_file, format, shifted_temp_result->name, operand->name, shift_amount->name);
+    free(operand);
+    free(shift_amount);
+    return shifted_temp_result;
+}
+
+reg* makeBitRotateOperation(reg* operand, reg* rotate_amount, reg* temp_rotate1, reg* temp_rotate2, const char* format){
+    reg* rotated_temp_result = createRegDefault();
+    fprintf(output_file, format, temp_rotate1->name, operand->name, rotate_amount->name , temp_rotate2->name,
+            operand->name, rotate_amount->name , rotated_temp_result->name, temp_rotate1->name, temp_rotate2->name);
+    free(operand);
+    free(rotate_amount);
+    return rotated_temp_result;
+}
 
 reg* xorFunction(reg* operand1, reg* operand2){ // xor function
-    reg* new_reg = createRegDefault();
-    // TODO: xor operands and store it in new_reg - do this for all binary-unary funcs
-    fprintf(output_file, "%s = xor i32 %s, %s \n",new_reg->name, operand1->name, operand2->name);
-    return new_reg;
+    // reg* new_reg = createRegDefault();
+    // // TODO: xor operands and store it in new_reg - do this for all binary-unary funcs
+    // fprintf(output_file, "%s = xor i32 %s, %s \n",new_reg->name, operand1->name, operand2->name);
+
+    reg* result = makeBitshiftOperation(operand1, operand2, "%s = xor i32 %s, %s \n");
+    return result;
 }
 
 reg* lsFunction(reg* operand, reg* shift_amount){ // ls function
-
-    return NULL;
+    reg* result = makeBitshiftOperation(operand, shift_amount, "%s = shl i32 %s, %s \n");
+    return result;
 }
 
 reg* rsFunction(reg* operand, reg* shift_amount){ // rs function
-    return NULL;
+    reg* result;
+    result = makeBitshiftOperation(operand, shift_amount, "%s = lshr i32 %s, %s \n");
+    return result;
 }
 
 reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
-//    return (operand << rotate_amount)|(operand >> (64 - rotate_amount));
-    return NULL;
+    reg* temp_rotate1 = createRegDefault();
+    reg* temp_rotate2 = createRegDefault();
+    reg* result = makeBitRotateOperation(
+            operand, rotate_amount, temp_rotate1, temp_rotate2,
+    "%s = lshr i32 %s, sub i32 32, %s\n"
+    "%s = shl i32 %s, %s\n"
+    "  %s = or i32 %s, %s\n"
+                             );
+    // %rotate1 = lshr i32 %val1, sub i32 32, %val2
+    // %rotate2 = shl i32 %val1, %val2
+    // %rotated = or i32 %rotate1, %rotate2
+    return result;
 }
 
 reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
-//    return (operand >> rotate_amount)|(operand << (64 - rotate_amount));
-    return NULL;
+    reg* temp_rotate1 = createRegDefault();
+    reg* temp_rotate2 = createRegDefault();
+    reg* result = makeBitRotateOperation(
+            operand, rotate_amount,  temp_rotate1, temp_rotate2,
+            "%s = lshr i32 %s, %s\n"
+            "%s = shl i32 %s, sub i32 32, %s\n"
+            "%s = or i32 %s, %s\n"
+            );
+    // %rotate1 = lshr i32 %val1, %val2
+    // %rotate2 = shl i32 %val1, sub i32 32, %val2
+    // %rotated = or i32 %rotate1, %rotate2
+    return result;
 }
 
 reg* makeOperation(reg* result, reg* term, const char* format){
@@ -76,8 +120,10 @@ reg* parseUnaryFunction(){ // not function
     reg* res = parseBitwiseOrExpression();
    // res = res ^ -1;
     // TODO: find not op and do that :D
+    reg* temp_res = createRegDefault();
+    fprintf(output_file,"%s = xor i32 %s, -1 \n", temp_res->name,res->name);
     matchToken(RIGHT_PAREN);
-    return res;
+    return temp_res;
 }
 reg* parseFactor(){
     token t = current_token;
@@ -215,6 +261,7 @@ void parseStatement(){  // two types of statements: assignment and bitwise or ex
         reg* result = parseBitwiseOrExpression(); // evaluates the (bitwise or expression)
         if(!has_error && token_index == token_count){ // if there is no error and all tokens are consumed
             // TODO: write the statement that calls printf from llvm
+            fprintf(output_file, printFormat, result->name);
         }
         else{
             printf("Error!\n"); // if there is an error or there are unconsumed tokens

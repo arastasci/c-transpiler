@@ -15,7 +15,7 @@ store i32 5, i32* %y
 %reg_4 = add i32 23, %reg_3 
 store i32 %reg_4, i32* %zvalue 
 %reg_5 = load i32, i32* %zvalue 
-%k = alloca i32 
+call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %reg_5 )%k = alloca i32 
 %reg_6 = load i32, i32* %x 
 %reg_7 = load i32, i32* %y 
 %reg_8 = sub i32 %reg_6, %reg_7 
@@ -32,5 +32,5 @@ store i32 %reg_10, i32* %k
 store i32 %reg_17, i32* %k 
 %reg_18 = load i32, i32* %k 
 %reg_19 = add i32 %reg_18, 1 
-ret i32 0
+call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %reg_19 )ret i32 0
 }
