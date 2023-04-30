@@ -52,7 +52,7 @@ void write_functions(){
                         "    store i32 %rotated, i32* %new_reg\n"
                         "    ret i32* %new_reg\n"
                         "}\n"
-                        )
+                        );
 }
 
 void write_end() {
