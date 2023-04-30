@@ -120,7 +120,8 @@ reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
     reg* result = makeRightRotateOperation(
             operand, rotate_amount,
             "%s = lshr i32 %s, %s\n"
-            "%s = shl i32 %s, sub i32 32, %s\n"
+            "%s = sub i32 32, %s\n"
+            "%s = shl i32 %s, %s\n"
             "%s = or i32 %s, %s\n"
             );
     // %rotate1 = lshr i32 %val1, %val2
