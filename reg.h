@@ -8,7 +8,7 @@
 extern int current_reg_id;
 typedef struct r {
     int id;
-    const char* name;
+    char* name;
 } reg;
 reg* createReg(const char*);
 reg* createRegDefault();

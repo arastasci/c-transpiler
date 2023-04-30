@@ -26,22 +26,38 @@ int main(int argc, char *argv[]){
     current_reg_id = 0;
     initializeHashMap();
 
+    line_count = 1;
+
     write_beginning();
 
+    has_error = false;
+    bool has_any_error = false;
     while(fgets(input, 258, input_file) != NULL){
+        // printf("%s", input);
         has_error = false;
-        printf("%s", input);
         tokenize(input);
-//         printTokens(); // for debug purposes
-        if(!has_error){
-            parseStatement();
+         //printTokens(); // for debug purposes
+        parseStatement();
+
+        if(has_error){
+            printf("Error in line %d!\n", line_count);
+            has_any_error = true;
         }
-        else{
-            printf("Error!\n");
-        }
+
         freeArrayMemory(); // free token array mem
+        line_count++;
     }
     write_end();
+
+
+    if(has_any_error){
+        // TODO: delete ll file
+        remove(output_file_name);
+    }
+    else{
+        fclose(output_file);
+    }
+    fclose(input_file);
     deallocHashMap();
     return 0;
 }

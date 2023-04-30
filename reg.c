@@ -6,16 +6,16 @@
 #include "string.h"
 int current_reg_id;
 
-reg* createReg(const char* name){
-    reg* new_reg = malloc(sizeof(reg));
-    char buf[128];
-    sprintf(buf,"%s",name);
-    new_reg->name = name;
-    new_reg->id = current_reg_id;
-    current_reg_id++;
-    // TODO: refactor code later for assigning and incrementing current_reg_id
-    return new_reg;
-}
+//reg* createReg(char* name){
+//    reg* new_reg = malloc(sizeof(reg));
+//    char buf[128];
+//    sprintf(buf,"%s",name);
+//    new_reg->name = name;
+//    new_reg->id = current_reg_id;
+//    current_reg_id++;
+//    // TODO: refactor code later for assigning and incrementing current_reg_id
+//    return new_reg;
+//}
 reg* createEmptyVarReg(){
     reg* new_reg = malloc(sizeof(reg));
     new_reg->name = "";
