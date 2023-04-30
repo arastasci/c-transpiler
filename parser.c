@@ -20,12 +20,23 @@ reg* makeBitshiftOperation(reg* operand, reg* shift_amount, const char* format){
     return shifted_temp_result;
 }
 
-reg* makeRotateOperation(reg* operand, reg* rotate_amount, reg* temp_rotate1, reg* temp_rotate2, reg* temp_sub, const char* format){
+reg* makeLeftRotateOperation(reg* operand, reg* rotate_amount, const char* format){
+    reg* temp_rotate1 = createRegDefault();
+    reg* temp_rotate2 = createRegDefault();
+    reg* temp_sub = createRegDefault();
     reg* rotated_temp_result = createRegDefault();
-    fprintf(output_file, format, temp_sub->name, rotate_amount->name, temp_rotate1->name, operand->name, temp_sub->name , temp_rotate2->name,
-            operand->name, rotate_amount->name , rotated_temp_result->name, temp_rotate1->name, temp_rotate2->name);
+    fprintf(output_file, format, 
+    temp_sub->name, rotate_amount->name,
+    temp_rotate1->name, operand->name, temp_sub->name ,
+    temp_rotate2->name, operand->name, rotate_amount->name ,
+    rotated_temp_result->name, temp_rotate1->name, temp_rotate2->name);
 //    free(operand);
 //    free(rotate_amount);
+
+    // %temp_sub = sub i32 32, %val2
+    // %rotate1 = lshr i32 %val1, temp_sub 
+    // %rotate2 = shl i32 %val1, %val2
+    // %rotated = or i32 %rotate1, %rotate2
     free(operand->name);
     free(operand);
     free(rotate_amount->name);
@@ -35,6 +46,33 @@ reg* makeRotateOperation(reg* operand, reg* rotate_amount, reg* temp_rotate1, re
     free(temp_rotate2->name);
     free(temp_rotate2);
 
+    return rotated_temp_result;
+}
+reg* makeRightRotateOperation(reg* operand, reg* rotate_amount, const char* format){
+    reg* temp_rotate1 = createRegDefault();
+    reg* temp_rotate2 = createRegDefault();
+    reg* temp_sub = createRegDefault();
+    reg* rotated_temp_result = createRegDefault();
+    fprintf(output_file, format, 
+    temp_rotate1->name, operand->name, rotate_amount->name ,
+    temp_sub->name, rotate_amount->name,
+    temp_rotate2->name, operand->name, temp_sub->name ,
+    rotated_temp_result->name, temp_rotate1->name, temp_rotate2->name);
+    free(operand->name);
+    free(operand);
+    free(rotate_amount->name);
+    free(rotate_amount);
+    free(temp_rotate1->name);
+    free(temp_rotate1);
+    free(temp_rotate2->name);
+    free(temp_rotate2);
+    free(temp_sub->name);
+    free(temp_sub);
+
+    // %rotate1 = lshr i32 %val1, %val2
+    // %temp_sub i32 32, %val2
+    // %rotate2 = shl i32 %val1, %temp_sub 
+    // %rotated = or i32 %rotate1, %rotate2
     return rotated_temp_result;
 }
 
@@ -62,14 +100,14 @@ reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
     reg* temp_rotate1 = createRegDefault();
     reg* temp_rotate2 = createRegDefault();
     reg* temp_sub = createRegDefault();
-    reg* result = makeBitRotateOperation(
-            operand, rotate_amount, temp_rotate1, temp_rotate2, temp_sub,
+    reg* result = makeLeftRotateOperation(
+            operand, rotate_amount,
     "%s = sub i32 32, %s\n"
     "%s = lshr i32 %s, %s\n"
     "%s = shl i32 %s, %s\n"
-    "  %s = or i32 %s, %s\n"
-                             );
-    // %rotate1 = lshr i32 %val1, sub i32 32, %val2
+    "  %s = or i32 %s, %s\n");
+    // %temp_sub = sub i32 32, %val2
+    // %rotate1 = lshr i32 %val1, temp_sub 
     // %rotate2 = shl i32 %val1, %val2
     // %rotated = or i32 %rotate1, %rotate2
     return result;
@@ -79,14 +117,15 @@ reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
     reg* temp_rotate1 = createRegDefault();
     reg* temp_rotate2 = createRegDefault();
     reg* temp_sub = createRegDefault();
-    reg* result = makeBitRotateOperation(
-            operand, rotate_amount,  temp_rotate1, temp_rotate2, temp_sub,
+    reg* result = makeRightRotateOperation(
+            operand, rotate_amount,
             "%s = lshr i32 %s, %s\n"
             "%s = shl i32 %s, sub i32 32, %s\n"
             "%s = or i32 %s, %s\n"
             );
     // %rotate1 = lshr i32 %val1, %val2
-    // %rotate2 = shl i32 %val1, sub i32 32, %val2
+    // %temp_sub i32 32, %val2
+    // %rotate2 = shl i32 %val1, %temp_sub 
     // %rotated = or i32 %rotate1, %rotate2
     return result;
 }
