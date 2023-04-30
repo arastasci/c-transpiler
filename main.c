@@ -36,20 +36,28 @@ int main(int argc, char *argv[]){
         // printf("%s", input);
         has_error = false;
         tokenize(input);
-//         printTokens(); // for debug purposes
+         //printTokens(); // for debug purposes
         parseStatement();
 
-        if(has_error)
+        if(has_error){
             printf("Error in line %d!\n", line_count);
+            has_any_error = true;
+        }
 
         freeArrayMemory(); // free token array mem
         line_count++;
     }
+    write_end();
+
+
     if(has_any_error){
         // TODO: delete ll file
         remove(output_file_name);
     }
-    write_end();
+    else{
+        fclose(output_file);
+    }
+    fclose(input_file);
     deallocHashMap();
     return 0;
 }
