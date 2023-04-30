@@ -16,41 +16,32 @@ int current_reg_id;
 //    // TODO: refactor code later for assigning and incrementing current_reg_id
 //    return new_reg;
 //}
-reg* createEmptyVarReg(){
-    reg* new_reg = malloc(sizeof(reg));
-    new_reg->name = "";
-    return new_reg;
-}
-reg* createRegDefault(){
-    reg* new_reg = malloc(sizeof(reg));
-    char* buffer = malloc(128 * sizeof(char));
-    sprintf(buffer,"%%reg_%d", current_reg_id);
-    new_reg->name = buffer;
+char* createEmptyVarReg(){
 
-    new_reg->id = current_reg_id;
+    return "";
+}
+char* createRegDefault(){
+    char* reg = malloc(128 * sizeof(char));
+    sprintf(reg,"%%reg_%d", current_reg_id);
     current_reg_id++;
-    return new_reg;
+    return reg;
 }
 
-void storeInVar(reg* var, reg* rhs){
-    fprintf(output_file, "store i32 %s, i32* %s \n", rhs->name, var->name);
+void storeInVar(char* var, char* rhs){
+    fprintf(output_file, "store i32 %s, i32* %s \n", rhs, var);
 }
 
-reg* loadVar(reg* var){
-    reg* new_reg = malloc(sizeof(reg));
-    char* buffer = malloc(128 * sizeof(char));
-    sprintf(buffer,"%%reg_%d", current_reg_id);
-    new_reg->name = buffer;
-
-    new_reg->id = current_reg_id;
+char* loadVar(char* var){
+    char* reg = malloc(128 * sizeof(char));
+    sprintf(reg,"%%reg_%d", current_reg_id);
     current_reg_id++;
-    fprintf(output_file, "%s = load i32, i32* %s \n", new_reg->name, var->name);
-    return new_reg;
+    fprintf(output_file, "%s = load i32, i32* %s \n", reg, var);
+    return reg;
 }
 
-reg* createRegInteger(const char* value){
-    reg* new_reg = malloc(sizeof(reg));
-    new_reg->name = value;
-    return new_reg;
+char* createRegInteger(const char* value){
+    char* reg = malloc(128 * sizeof(char));
+    strcpy(reg,value);
+    return reg;
 }
 #endif

@@ -4,12 +4,12 @@
 #include "hash.h"
 #include "reg.h"
 void parseStatement();
-reg* parseExpression();
-reg* parseTerm();
-reg* parseFactor();
-reg* parseBitwiseOrExpression();
-reg* parseBitwiseAndExpression();
-reg* makeOperation(reg* result, reg* descendent_term, const char* format);
+char* parseExpression();
+char* parseTerm();
+char* parseFactor();
+char* parseBitwiseOrExpression();
+char* parseBitwiseAndExpression();
+char* makeOperation(char* result, char* descendent_term, const char* format);
 
 
 

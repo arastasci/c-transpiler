@@ -6,14 +6,11 @@
 #define CMPE230P2_REG_H
 #include "file.h"
 extern int current_reg_id;
-typedef struct r {
-    int id;
-    char* name;
-} reg;
-reg* createReg(const char*);
-reg* createRegDefault();
-reg* createEmptyVarReg();
-reg* createRegInteger(const char*);
-void storeInVar(reg* var, reg* rhs);
-reg* loadVar(reg* var);
+
+char* createReg(const char*);
+char* createRegDefault();
+char* createEmptyVarReg();
+char* createRegInteger(const char*);
+void storeInVar(char* var, char* rhs);
+char* loadVar(char* var);
 #endif //CMPE230P2_REG_H
