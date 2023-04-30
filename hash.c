@@ -25,7 +25,7 @@ variable* insert(const char* identifier){   // insert a variable into the hashma
         if(strcmp(variables[(firstHashVal + i) % 128].name, "" ) == 0){
             variable* var = &variables[(firstHashVal + i) % 128];
             var->name = identifier;
-
+            var->var_reg->name = identifier;
             return var;
         }
     }

@@ -3,24 +3,32 @@
 #include "parser.h"
 #include "tokenizer.h"
 #include "file.h"
+
+
 reg* xorFunction(reg* operand1, reg* operand2){ // xor function
     reg* new_reg = createRegDefault();
     // TODO: xor operands and store it in new_reg - do this for all binary-unary funcs
     fprintf(output_file, "%s = xor i32 %s, %s \n",new_reg->name, operand1->name, operand2->name);
     return new_reg;
 }
+
 reg* lsFunction(reg* operand, reg* shift_amount){ // ls function
 
-    return operand << shift_amount;
+    return NULL;
 }
+
 reg* rsFunction(reg* operand, reg* shift_amount){ // rs function
-    return operand >> shift_amount;
+    return NULL;
 }
+
 reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
-    return (operand << rotate_amount)|(operand >> (64 - rotate_amount));
+//    return (operand << rotate_amount)|(operand >> (64 - rotate_amount));
+    return NULL;
 }
+
 reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
-    return (operand >> rotate_amount)|(operand << (64 - rotate_amount));
+//    return (operand >> rotate_amount)|(operand << (64 - rotate_amount));
+    return NULL;
 }
 
 void makeOperation(reg* result, reg* term, const char* format){
@@ -65,7 +73,7 @@ reg* parseUnaryFunction(){ // not function
     matchToken(LEFT_PAREN);
 
     reg* res = parseBitwiseOrExpression();
-    res = res ^ -1;
+   // res = res ^ -1;
     // TODO: find not op and do that :D
     matchToken(RIGHT_PAREN);
     return res;
@@ -117,11 +125,11 @@ reg* parseTerm(){
         token t = current_token;
         matchToken(OPERATOR_MULTIPLICATIVE);
         if(strcmp(t.symbol, "*") == 0){
-            makeOperation(result, parseFactor(),"%s = mul i32 %s, i32 %s");
+            makeOperation(result, parseFactor(),"%s = mul i32 %s, i32 %s \n");
         }
 
         if(strcmp(t.symbol, "/") == 0){
-            makeOperation(result, parseFactor(), "%s = sdiv i32 %s, i32 %s");
+            makeOperation(result, parseFactor(), "%s = sdiv i32 %s, %s\n");
         }
         if(strcmp(t.symbol, "%") == 0){
             // TODO: with the above syntax, make a modulo operation.
@@ -136,10 +144,10 @@ reg* parseExpression(){
         token t = current_token;
         matchToken(OPERATOR_ADDITIVE);
         if(strncmp(t.symbol,"+", 1) == 0){
-            makeOperation(result, parseTerm(), "%s = add i32 %s, i32 %s");
+            makeOperation(result, parseTerm(), "%s = add i32 %s, %s \n");
         }
         else{ // subtraction
-            makeOperation(result, parseTerm(), "%s = sub i32 %s, i32 %s");
+            makeOperation(result, parseTerm(), "%s = sub i32 %s, %s \n");
 
         }
     }
@@ -150,6 +158,7 @@ reg* parseVariable(){  // returns the variable pointer
     matchToken(IDENTIFIER);
     variable *var = find(t.symbol); // check if the variable is in the hashmap
     if(var == NULL){
+        fprintf(output_file,"%%%%s alloca i32");
         return insert(t.symbol)->var_reg; // if not, insert it and return the pointer
 
     }
@@ -163,7 +172,7 @@ reg* parseBitwiseAndExpression(){
     while (token_index < token_count && strcmp(current_token.symbol, "&")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_BITWISE);
-        makeOperation(result, parseExpression(),"%s = and i32 %s, i32 %s");
+        makeOperation(result, parseExpression(),"%s = and i32 %s, %s \n");
     }
     return result;
 };
@@ -173,7 +182,7 @@ reg* parseBitwiseOrExpression(){
     while (token_index < token_count && strcmp(current_token.symbol, "|")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_BITWISE);
-        makeOperation(result, parseBitwiseAndExpression(), "%s = or i32 %s, i32 %s");
+        makeOperation(result, parseBitwiseAndExpression(), "%s = or i32 %s, %s \n");
     }
     return result;
 };
@@ -190,6 +199,7 @@ void parseAssignment(){
     else{
         if(justInitialized) var->name = ""; // delete variable from the array if there is an error
         printf("Error!\n");
+        // TODO: delete the .ll file
     }
 }
 

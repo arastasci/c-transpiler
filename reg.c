@@ -4,6 +4,8 @@
 #define REG_H
 #include "reg.h"
 
+int current_reg_id;
+
 reg* createReg(const char* name){
     reg* new_reg = malloc(sizeof(reg));
 
@@ -27,6 +29,7 @@ reg* createRegDefault(){
 
 void storeInVar(reg* var, reg* rhs){
     // TODO: print store thingy...
+    fprintf(output_file, "store i32 %%%s, i32* %%%s", rhs->name, var->name);
 }
 
 reg* createRegInteger(const char* value){

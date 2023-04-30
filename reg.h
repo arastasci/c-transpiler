@@ -4,6 +4,7 @@
 
 #ifndef CMPE230P2_REG_H
 #define CMPE230P2_REG_H
+#include "file.h"
 extern int current_reg_id;
 typedef struct r {
     int id;
