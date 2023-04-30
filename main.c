@@ -21,23 +21,27 @@ int main(int argc, char *argv[]){
     output_file = fopen(output_file_name, "w+");
 
     char input [258];
-    initializeHashMap();
     allocateArrayMemory(); // allocate token array mem
 
     current_reg_id = 0;
+    initializeHashMap();
+
+    write_beginning();
+
     while(fgets(input, 258, input_file) != NULL){
         has_error = false;
         printf("%s", input);
         tokenize(input);
-        // printTokens(); // for debug purposes
-//        if(!has_error){
-//            parseStatement();
-//        }
-//        else{
-//            printf("Error!\n");
-//        }
+//         printTokens(); // for debug purposes
+        if(!has_error){
+            parseStatement();
+        }
+        else{
+            printf("Error!\n");
+        }
         freeArrayMemory(); // free token array mem
     }
+    write_end();
     deallocHashMap();
     return 0;
 }

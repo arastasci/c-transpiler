@@ -12,7 +12,8 @@ typedef struct r {
 } reg;
 reg* createReg(const char*);
 reg* createRegDefault();
+reg* createEmptyVarReg();
 reg* createRegInteger(const char*);
 void storeInVar(reg* var, reg* rhs);
-
+reg* loadVar(reg* var);
 #endif //CMPE230P2_REG_H
