@@ -6,6 +6,7 @@
 FILE* output_file;
 FILE* input_file;
 
+int line_count;
 
 void write_beginning(){
     fprintf(output_file,"; ModuleID = 'advcalc2ir'\n"

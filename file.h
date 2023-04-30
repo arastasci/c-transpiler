@@ -8,7 +8,7 @@
 
 extern FILE* input_file;
 extern FILE* output_file;
-
+extern int line_count;
 void write_beginning();
 void write_end();
 #endif //CMPE230P2_FILE_H

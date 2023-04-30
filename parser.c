@@ -139,7 +139,7 @@ reg* parseFactor(){
 
         if(var == NULL){
             raiseTokenError();
-            return NULL;
+            return createRegDefault();
         }
         else{
             // load the var
@@ -242,14 +242,12 @@ void parseAssignment(){
     bool justInitialized = find(current_token.symbol) == NULL;
     reg* var = parseVariable();
     matchToken(ASSIGNMENT);
-    reg* response = parseBitwiseOrExpression();   // get the value of the (bitwise or expression)
+    reg* response = parseBitwiseOrExpression(); // get the value of the (bitwise or expression)
     if(!has_error && token_index == token_count){
         storeInVar(var, response);
     }
     else{
         if(justInitialized) var->name = ""; // delete variable from the array if there is an error
-        printf("Error!\n");
-        // TODO: delete the .ll file
     }
 }
 
@@ -264,7 +262,7 @@ void parseStatement(){  // two types of statements: assignment and bitwise or ex
             fprintf(output_file, printFormat, result->name);
         }
         else{
-            printf("Error!\n"); // if there is an error or there are unconsumed tokens
+            printf("Error on line %d!\n",line_count); // if there is an error or there are unconsumed tokens
         }
     }
 }
