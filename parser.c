@@ -2,14 +2,15 @@
 #include <stdbool.h>
 #include "parser.h"
 #include "tokenizer.h"
-
-
+#include "file.h"
 reg* xorFunction(reg* operand1, reg* operand2){ // xor function
     reg* new_reg = createRegDefault();
     // TODO: xor operands and store it in new_reg - do this for all binary-unary funcs
+    fprintf(output_file, "%s = xor i32 %s, %s \n",new_reg->name, operand1->name, operand2->name);
     return new_reg;
 }
 reg* lsFunction(reg* operand, reg* shift_amount){ // ls function
+
     return operand << shift_amount;
 }
 reg* rsFunction(reg* operand, reg* shift_amount){ // rs function
@@ -22,8 +23,19 @@ reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
     return (operand >> rotate_amount)|(operand << (64 - rotate_amount));
 }
 
+void makeOperation(reg* result, reg* term, const char* format){
+
+    // write result multiplied by factor2
+    // then result = the new reg
+    // <result> = <operation> <ty> <op1>, <op2>
+    reg* temp_result = createRegDefault();
+    fprintf(output_file, format, temp_result->name, result->name, term->name);
+    free(result);
+    free(term);
+    result = temp_result;
+}
+
 reg* parseBinaryFunction(const char* operand_symbol){ // binary functions
-    reg* result;
     matchToken(LEFT_PAREN);
     reg* operand1 = parseBitwiseOrExpression();
     matchToken(SEPARATOR);
@@ -31,8 +43,7 @@ reg* parseBinaryFunction(const char* operand_symbol){ // binary functions
     matchToken(RIGHT_PAREN);
 
     if(strncmp(operand_symbol,"xor",3) == 0){
-         return xorFunction(operand1, operand2);
-
+        return xorFunction(operand1, operand2);
     }
     if(strncmp(operand_symbol,"ls",2) == 0){
          return lsFunction(operand1, operand2);
@@ -46,9 +57,8 @@ reg* parseBinaryFunction(const char* operand_symbol){ // binary functions
     if (strncmp(operand_symbol,"rr", 2) == 0){
         return rrFunction(operand1, operand2);
     }
-    // raise error // impossible
+    // raise error
     return 0; // impossible
-
 }
 
 reg* parseUnaryFunction(){ // not function
@@ -56,15 +66,17 @@ reg* parseUnaryFunction(){ // not function
 
     reg* res = parseBitwiseOrExpression();
     res = res ^ -1;
+    // TODO: find not op and do that :D
     matchToken(RIGHT_PAREN);
     return res;
 }
 reg* parseFactor(){
     token t = current_token;
-    reg* new_reg = createRegDefault();
+    // reg* new_reg = createRegDefault();
     if(t.type == INTEGER){
         matchToken(INTEGER);
-        return atoll(t.symbol);
+        reg* int_reg = createRegInteger(t.symbol);
+        return int_reg;
     }
     else if(t.type == IDENTIFIER){
         matchToken(IDENTIFIER);
@@ -95,7 +107,8 @@ reg* parseFactor(){
     }
     // raise error from tokenizer.c
     raiseTokenError();
-    return 1; 
+    printf("factor not parsed in line 99. token error\n");
+    return NULL;
 }
 reg* parseTerm(){
 
@@ -103,12 +116,16 @@ reg* parseTerm(){
     while(current_token.type == OPERATOR_MULTIPLICATIVE){
         token t = current_token;
         matchToken(OPERATOR_MULTIPLICATIVE);
-        if(strcmp(t.symbol, "*") == 0)
-            result *= parseFactor();    // get second factor to be multiplied with the first factor
-        if(strcmp(t.symbol, "/") == 0)
-            result /= parseFactor();    // divide res by parseFactor's return value
-        if(strcmp(t.symbol, "%") == 0)
-            result %= parseFactor();    // get second factor to be modulo'ed with the first factor
+        if(strcmp(t.symbol, "*") == 0){
+            makeOperation(result, parseFactor(),"%s = mul i32 %s, i32 %s");
+        }
+
+        if(strcmp(t.symbol, "/") == 0){
+            makeOperation(result, parseFactor(), "%s = sdiv i32 %s, i32 %s");
+        }
+        if(strcmp(t.symbol, "%") == 0){
+            // TODO: with the above syntax, make a modulo operation.
+        }
     }
     return result;
 }
@@ -119,10 +136,11 @@ reg* parseExpression(){
         token t = current_token;
         matchToken(OPERATOR_ADDITIVE);
         if(strncmp(t.symbol,"+", 1) == 0){
-            result += parseTerm() ; // get second term to be added to the first term
+            makeOperation(result, parseTerm(), "%s = add i32 %s, i32 %s");
         }
-        else{
-            result -= parseTerm();  // get second term to be subtracted from the first term
+        else{ // subtraction
+            makeOperation(result, parseTerm(), "%s = sub i32 %s, i32 %s");
+
         }
     }
     return result;
@@ -145,7 +163,7 @@ reg* parseBitwiseAndExpression(){
     while (token_index < token_count && strcmp(current_token.symbol, "&")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_BITWISE);
-        result &= parseExpression();  // get second expression to be bitwise 'and'ed with the first expression
+        makeOperation(result, parseExpression(),"%s = and i32 %s, i32 %s");
     }
     return result;
 };
@@ -155,7 +173,7 @@ reg* parseBitwiseOrExpression(){
     while (token_index < token_count && strcmp(current_token.symbol, "|")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_BITWISE);
-        result |= parseBitwiseAndExpression();  // get second (bitwise and expression) to be bitwise 'or'ed with the first (bitwise and expression)
+        makeOperation(result, parseBitwiseAndExpression(), "%s = or i32 %s, i32 %s");
     }
     return result;
 };
@@ -182,7 +200,7 @@ void parseStatement(){  // two types of statements: assignment and bitwise or ex
     else if(token_count != 0){
         reg* result = parseBitwiseOrExpression(); // evaluates the (bitwise or expression)
         if(!has_error && token_index == token_count){ // if there is no error and all tokens are consumed
-            printf("%d\n", result);
+            // TODO: write the statement that calls printf from llvm
         }
         else{
             printf("Error!\n"); // if there is an error or there are unconsumed tokens

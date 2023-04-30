@@ -9,7 +9,7 @@ reg* parseTerm();
 reg* parseFactor();
 reg* parseBitwiseOrExpression();
 reg* parseBitwiseAndExpression();
-
+void makeOperation(reg* result, reg* descendent_term, const char* format);
 
 
 
