@@ -20,9 +20,9 @@ reg* makeBitshiftOperation(reg* operand, reg* shift_amount, const char* format){
     return shifted_temp_result;
 }
 
-reg* makeBitRotateOperation(reg* operand, reg* rotate_amount, reg* temp_rotate1, reg* temp_rotate2, const char* format){
+reg* makeRotateOperation(reg* operand, reg* rotate_amount, reg* temp_rotate1, reg* temp_rotate2, reg* temp_sub, const char* format){
     reg* rotated_temp_result = createRegDefault();
-    fprintf(output_file, format, temp_rotate1->name, operand->name, rotate_amount->name , temp_rotate2->name,
+    fprintf(output_file, format, temp_sub->name, rotate_amount->name, temp_rotate1->name, operand->name, temp_sub->name , temp_rotate2->name,
             operand->name, rotate_amount->name , rotated_temp_result->name, temp_rotate1->name, temp_rotate2->name);
 //    free(operand);
 //    free(rotate_amount);
@@ -34,6 +34,7 @@ reg* makeBitRotateOperation(reg* operand, reg* rotate_amount, reg* temp_rotate1,
     free(temp_rotate1);
     free(temp_rotate2->name);
     free(temp_rotate2);
+
     return rotated_temp_result;
 }
 
@@ -60,9 +61,11 @@ reg* rsFunction(reg* operand, reg* shift_amount){ // rs function
 reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
     reg* temp_rotate1 = createRegDefault();
     reg* temp_rotate2 = createRegDefault();
+    reg* temp_sub = createRegDefault();
     reg* result = makeBitRotateOperation(
-            operand, rotate_amount, temp_rotate1, temp_rotate2,
-    "%s = lshr i32 %s, sub i32 32, %s\n"
+            operand, rotate_amount, temp_rotate1, temp_rotate2, temp_sub,
+    "%s = sub i32 32, %s\n"
+    "%s = lshr i32 %s, %s\n"
     "%s = shl i32 %s, %s\n"
     "  %s = or i32 %s, %s\n"
                              );
@@ -75,8 +78,9 @@ reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
 reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
     reg* temp_rotate1 = createRegDefault();
     reg* temp_rotate2 = createRegDefault();
+    reg* temp_sub = createRegDefault();
     reg* result = makeBitRotateOperation(
-            operand, rotate_amount,  temp_rotate1, temp_rotate2,
+            operand, rotate_amount,  temp_rotate1, temp_rotate2, temp_sub,
             "%s = lshr i32 %s, %s\n"
             "%s = shl i32 %s, sub i32 32, %s\n"
             "%s = or i32 %s, %s\n"
