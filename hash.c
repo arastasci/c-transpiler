@@ -5,7 +5,7 @@ void initializeHashMap(){   // initialize the hashmap and assign all the names t
     variables = malloc(128 * (sizeof(variable)));
     for(int i = 0; i < 128; i++){
         variables[i].name = "";
-        variables[i].var_reg = 0;
+        variables[i].var_reg = *createEmptyVarReg();
     }
 }
 int hash(const char* identifier){ // djb2
@@ -24,8 +24,10 @@ variable* insert(const char* identifier){   // insert a variable into the hashma
     for(int i = 0; i < 128; i++){   // linear probing
         if(strcmp(variables[(firstHashVal + i) % 128].name, "" ) == 0){
             variable* var = &variables[(firstHashVal + i) % 128];
+            char* buf = malloc(sizeof(char) *128);
+            sprintf(buf,"%%%s",identifier);
             var->name = identifier;
-            var->var_reg->name = identifier;
+            var->var_reg.name = buf;
             return var;
         }
     }

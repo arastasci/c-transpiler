@@ -31,16 +31,17 @@ reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
     return NULL;
 }
 
-void makeOperation(reg* result, reg* term, const char* format){
+reg* makeOperation(reg* result, reg* term, const char* format){
 
     // write result multiplied by factor2
     // then result = the new reg
     // <result> = <operation> <ty> <op1>, <op2>
     reg* temp_result = createRegDefault();
     fprintf(output_file, format, temp_result->name, result->name, term->name);
-    free(result);
-    free(term);
-    result = temp_result;
+//    free(result);
+//    free(term);
+// TODO: free the memory goddzayyummit...
+    return temp_result;
 }
 
 reg* parseBinaryFunction(const char* operand_symbol){ // binary functions
@@ -95,7 +96,9 @@ reg* parseFactor(){
             return NULL;
         }
         else{
-            return var->var_reg;
+            // load the var
+
+            return loadVar(&var->var_reg);
         }
     }
     else if(t.type == STR_OPERATOR_BINARY){
@@ -125,11 +128,11 @@ reg* parseTerm(){
         token t = current_token;
         matchToken(OPERATOR_MULTIPLICATIVE);
         if(strcmp(t.symbol, "*") == 0){
-            makeOperation(result, parseFactor(),"%s = mul i32 %s, i32 %s \n");
+            result = makeOperation(result, parseFactor(),"%s = mul i32 %s, %s \n");
         }
 
         if(strcmp(t.symbol, "/") == 0){
-            makeOperation(result, parseFactor(), "%s = sdiv i32 %s, %s\n");
+            result = makeOperation(result, parseFactor(), "%s = sdiv i32 %s, %s\n");
         }
         if(strcmp(t.symbol, "%") == 0){
             // TODO: with the above syntax, make a modulo operation.
@@ -144,10 +147,10 @@ reg* parseExpression(){
         token t = current_token;
         matchToken(OPERATOR_ADDITIVE);
         if(strncmp(t.symbol,"+", 1) == 0){
-            makeOperation(result, parseTerm(), "%s = add i32 %s, %s \n");
+            result = makeOperation(result, parseTerm(), "%s = add i32 %s, %s \n");
         }
         else{ // subtraction
-            makeOperation(result, parseTerm(), "%s = sub i32 %s, %s \n");
+            result = makeOperation(result, parseTerm(), "%s = sub i32 %s, %s \n");
 
         }
     }
@@ -158,12 +161,13 @@ reg* parseVariable(){  // returns the variable pointer
     matchToken(IDENTIFIER);
     variable *var = find(t.symbol); // check if the variable is in the hashmap
     if(var == NULL){
-        fprintf(output_file,"%%%%s alloca i32");
-        return insert(t.symbol)->var_reg; // if not, insert it and return the pointer
+        reg* inserted_var = &insert(t.symbol)->var_reg;
+        fprintf(output_file,"%s = alloca i32 \n", inserted_var->name);
+        return inserted_var; // if not, insert it and return the pointer
 
     }
     else{
-        return var->var_reg; // if it is, return the pointer
+        return &var->var_reg; // if it is, return the pointer
     }
 }
 
