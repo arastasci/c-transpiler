@@ -12,10 +12,10 @@ int main(int argc, char *argv[]){
         return -1;
     }
     char* input_file_name = argv[1];
-    char no_extension_name [50];
+    char no_extension_name [1000];
     strcpy(no_extension_name, input_file_name);
     strtok(no_extension_name,".");
-    char output_file_name [50];
+    char output_file_name [1000];
     sprintf(output_file_name,"%s.ll", no_extension_name);
     input_file = fopen(input_file_name,"r");
     output_file = fopen(output_file_name, "w+");
