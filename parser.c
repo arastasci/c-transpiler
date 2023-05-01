@@ -284,7 +284,13 @@ void parseAssignment(){
         storeInVar(var, response);
     }
     else{
-        if(justInitialized) var = ""; // delete variable from the array if there is an error
+
+        if(justInitialized)  // delete variable from the array if there is an error
+        {
+            variable* s_var =  find(&var[1]);
+            strcpy(s_var-> name , "");
+            strcpy(s_var->reg, "");
+        }
     }
     free(response);
 }
