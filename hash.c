@@ -28,6 +28,7 @@ variable* insert(const char* identifier){   // insert a variable into the hashma
             sprintf(buf,"%%%s",identifier);
             strcpy(var->name, identifier);
             strcpy(var->reg, buf);
+            free(buf);
             return var;
         }
     }

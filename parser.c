@@ -5,18 +5,18 @@
 #include "file.h"
 
 const char* printFormat = "call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %s ) \n";
-char* makeBitshiftOperation(char* operand, char* shift_amount, const char* format){
-    // write result multiplied by factor2
-    // then result = the new reg
-    // <result> = <operation> <ty> <op1>, <op2>
-    char* shifted_temp_result = createRegDefault();
-    fprintf(output_file, format, shifted_temp_result, operand, shift_amount);
+//char* makeBitshiftOperation(char* operand, char* shift_amount, const char* format){
+//    // write result multiplied by factor2
+//    // then result = the new reg
+//    // <result> = <operation> <ty> <op1>, <op2>
+//    char* shifted_temp_result = createRegDefault();
+//    fprintf(output_file, format, shifted_temp_result, operand, shift_amount);
+////    free(operand);
+////    free(shift_amount);
 //    free(operand);
 //    free(shift_amount);
-    free(operand);
-    free(shift_amount);
-    return shifted_temp_result;
-}
+//    return shifted_temp_result;
+//}
 
 char* makeLeftRotateOperation(char* operand, char* rotate_amount){
     const char* format =     "%s = sub i32 32, %s\n"
@@ -43,7 +43,7 @@ char* makeLeftRotateOperation(char* operand, char* rotate_amount){
     free(rotate_amount);
     free(temp_rotate1);
     free(temp_rotate2);
-
+    free(temp_sub);
     return rotated_temp_result;
 }
 char* makeRightRotateOperation(char* operand, char* rotate_amount){
@@ -62,6 +62,7 @@ char* makeRightRotateOperation(char* operand, char* rotate_amount){
     rotated_temp_result, temp_rotate1, temp_rotate2);
     free(operand);
     free(rotate_amount);
+    free(temp_rotate1);
     free(temp_rotate2);
     free(temp_sub);
 
@@ -77,18 +78,17 @@ char* xorFunction(char* operand1, char* operand2){ // xor function
     // // TODO: xor operands and store it in new_reg - do this for all binary-unary funcs
     // fprintf(output_file, "%s = xor i32 %s, %s \n",new_reg, operand1, operand2);
 
-    char* result = makeBitshiftOperation(operand1, operand2, "%s = xor i32 %s, %s \n");
+    char* result = makeOperation(operand1, operand2, "%s = xor i32 %s, %s \n");
     return result;
 }
 
 char* lsFunction(char* operand, char* shift_amount){ // ls function
-    char* result = makeBitshiftOperation(operand, shift_amount, "%s = shl i32 %s, %s \n");
+    char* result = makeOperation(operand, shift_amount, "%s = shl i32 %s, %s \n");
     return result;
 }
 
 char* rsFunction(char* operand, char* shift_amount){ // rs function
-    char* result;
-    result = makeBitshiftOperation(operand, shift_amount, "%s = lshr i32 %s, %s \n");
+    char* result = makeOperation(operand, shift_amount, "%s = lshr i32 %s, %s \n");
     return result;
 }
 
@@ -158,6 +158,7 @@ char* parseUnaryFunction(){ // not function
     char* temp_res = createRegDefault();
     fprintf(output_file,"%s = xor i32 %s, -1 \n", temp_res,res);
     matchToken(RIGHT_PAREN);
+    free(res);
     return temp_res;
 }
 char* parseFactor(){
@@ -285,6 +286,7 @@ void parseAssignment(){
     else{
         if(justInitialized) var = ""; // delete variable from the array if there is an error
     }
+    free(response);
 }
 
 void parseStatement(){  // two types of statements: assignment and bitwise or expression
@@ -297,8 +299,9 @@ void parseStatement(){  // two types of statements: assignment and bitwise or ex
             // TODO: write the statement that calls printf from llvm
             fprintf(output_file, printFormat, result);
         }
-        else{
-            // printf("Error on line %d!\n",line_count); // if there is an error or there are unconsumed tokens
-        }
+//        else{
+//            // printf("Error on line %d!\n",line_count); // if there is an error or there are unconsumed tokens
+//        }
+        free(result);
     }
 }

@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
     char* input_file_name = argv[1];
-    char no_extension_name [1000];
+    char no_extension_name [990];
     strcpy(no_extension_name, input_file_name);
     strtok(no_extension_name,".");
     char output_file_name [1000];

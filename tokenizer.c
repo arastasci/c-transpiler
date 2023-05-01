@@ -60,7 +60,7 @@ int getToken(char* input, token* t, bool* exit_early){
 
     else if (input[i] == '+') {
         t->type = OPERATOR_ADDITIVE;
-
+        strcpy(t->symbol, "+");
         i++;
     }
 
