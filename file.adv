@@ -3,20 +3,20 @@
  z = x * y * y*y 
  z
 64
- qqq = xor(131, 198)
- qqq
- 69
- xor(((x)), x)
+qqq = xor(131, 198)
+    qqq
+69
+xor(((x)), x)
 
- xor(((x)), x) | z + y
+xor(((x)), x) | z + y
 
- rs(xor(((x)), x) | z + y, 1)
+rs(xor(((x)), x) | z + y, 1)
 
- ls(rs(xor(((x)), x) | z + y, 1), (((1))))
+ls(rs(xor(((x)), x) | z + y, 1), (((1))))
 
- lr(ls(rs(xor(((x)), x) | z + y, 1), (((1)))), 1)
+lr(ls(rs(xor(((x)), x) | z + y, 1), (((1)))), 1)
 
- rr(lr(ls(rs(xor(((x)), x) | z + y, 1), (((1)))), 1), 1)
+rr(lr(ls(rs(xor(((x)), x) | z + y, 1), (((1)))), 1), 1)
 
 qqq * not(not(10))
 

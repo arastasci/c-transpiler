@@ -4,7 +4,7 @@ static int id_counter = 0;
 bool has_error;
 token current_token;
 
-token* token_array;
+token token_array[128];
 int token_count;
 const char* binary_operator_funcs[] = {"xor", "ls", "rs", "lr", "rr", };    // binary operators
 const char* unary_operator = "not"; // unary operator
@@ -46,7 +46,6 @@ int getToken(char* input, token* t, bool* exit_early){
     int i = 0;
     int j = 0;
 
-    char* symbol = malloc(MAX_TOKEN_LENGTH);
 
     while (isspace(input[i])) i++; // skip whitespaces
 
@@ -61,87 +60,84 @@ int getToken(char* input, token* t, bool* exit_early){
 
     else if (input[i] == '+') {
         t->type = OPERATOR_ADDITIVE;
-        t->symbol = "+";
+
         i++;
     }
 
     else if (input[i] == '-') {
         t->type = OPERATOR_ADDITIVE;
-        t->symbol = "-";
+        strcpy(t->symbol, "-");
         i++;
     }
     else if (input[i] == '*') {
         t->type = OPERATOR_MULTIPLICATIVE;
-        t->symbol = "*";
+        strcpy(t->symbol, "*");
         i++;
     }
     else if (input[i] == '/') {
         t->type = OPERATOR_MULTIPLICATIVE;
-        t->symbol = "/";
+        strcpy(t->symbol, "/");
         i++;
     }
     else if (input[i] == '%') {
         t->type = OPERATOR_MULTIPLICATIVE;
-        t->symbol = "%";
+        strcpy(t->symbol, "%");
         i++;
     }
 
     else if (input[i] == '&') {
         t->type = OPERATOR_BITWISE;
-        t->symbol = "&";
+        strcpy(t->symbol, "&");
         i++;
     }
     else if (input[i] == '|') {
         t->type = OPERATOR_BITWISE;
-        t->symbol = "|";
+        strcpy(t->symbol, "|");
         i++;
     }
     #pragma endregion
     else if (input[i] == ','){
         t->type = SEPARATOR;
-        t->symbol = ",";
+        strcpy(t->symbol, ",");
         i++;
     }
     else if (input[i] == '(') {
         t->type = LEFT_PAREN;
-        t->symbol = "(";
+        strcpy(t->symbol, "(");
         i++;
     }
     else if (input[i] == ')') {
         t->type = RIGHT_PAREN;
-        t->symbol = ")";
+        strcpy(t->symbol, ")");
         i++;
     }
     else if (input[i] == '=') {
         t->type = ASSIGNMENT;
-        t->symbol = "=";
+        strcpy(t->symbol, "=");
         i++;
     }
     else if (isdigit(input[i])) {   // if the input is a digit, determine if it is an integer iterating and get the value
         t->type = INTEGER;
+
         while (isdigit(input[i])) {
-            symbol[j] = input[i];
+            t->symbol[j] = input[i];
             i++;
             j++;
         }
-        symbol[j] = '\0';   // null terminate the string
-
-        t->symbol = symbol;
-
+        t->symbol[j] = '\0';   // null terminate the string
     }
     else if (isalpha(input[i])) {   // if the input is a letter, determine if it is an identifier or a keyword
         while (isalpha(input[i])) {
-            symbol[j] = input[i];
+            t->symbol[j] = input[i];
             i++;
             j++;
 
         }
-        symbol[j] = '\0';
-
-        t->symbol = symbol;
+        t->symbol[j] = '\0';
 
 
-        t->type = determineTokenTypeOfAlpha(symbol);
+
+        t->type = determineTokenTypeOfAlpha(t->symbol);
     }
     else{
         raiseTokenError();
@@ -168,15 +164,10 @@ void tokenize(char* input){
     token_count = cur_token_count;
     current_token = token_array[0];
 }
-void allocateArrayMemory(){ // allocate memory for the token array
-    token_array = malloc(128 * sizeof(token));
-}
-void freeArrayMemory(){ // free the memory of the token array
-//    for(int i = 0; i < MAX_TOKEN_COUNT; i++){
-//        if(token_array[i].symbol != NULL)
-//            free(token_array[i].symbol);
-//    }
-    memset(token_array, 0, 128 * sizeof(token));
+
+void resetTokenArray(){ // free the memory of the token array
+
+    memset(token_array, 0, MAX_TOKEN_COUNT * sizeof(token));
 }
 void printTokens(){ // created for debugging
 

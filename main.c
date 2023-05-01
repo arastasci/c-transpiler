@@ -21,7 +21,6 @@ int main(int argc, char *argv[]){
     output_file = fopen(output_file_name, "w+");
 
     char input [258];
-    allocateArrayMemory(); // allocate token array mem
 
     current_reg_id = 0;
     initializeHashMap();
@@ -44,14 +43,12 @@ int main(int argc, char *argv[]){
             has_any_error = true;
         }
 
-        freeArrayMemory(); // free token array mem
+        resetTokenArray(); // free token array mem
         line_count++;
     }
     write_end();
 
-
     if(has_any_error){
-        // TODO: delete ll file
         remove(output_file_name);
     }
     else{
