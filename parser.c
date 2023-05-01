@@ -20,7 +20,7 @@ const char* printFormat = "call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i
 
 char* makeLeftRotateOperation(char* operand, char* rotate_amount){
     const char* format =     "%s = sub i32 32, %s\n"
-                             "%s = lshr i32 %s, %s\n"
+                             "%s = ashr i32 %s, %s\n"
                              "%s = shl i32 %s, %s\n"
                              "  %s = or i32 %s, %s\n";
     char* temp_rotate1 = createRegDefault();
@@ -47,7 +47,7 @@ char* makeLeftRotateOperation(char* operand, char* rotate_amount){
     return rotated_temp_result;
 }
 char* makeRightRotateOperation(char* operand, char* rotate_amount){
-    const char* format =  "%s = lshr i32 %s, %s\n"
+    const char* format =  "%s = ashr i32 %s, %s\n"
                           "%s = sub i32 32, %s\n"
                           "%s = shl i32 %s, %s\n"
                           "%s = or i32 %s, %s\n";
@@ -88,7 +88,7 @@ char* lsFunction(char* operand, char* shift_amount){ // ls function
 }
 
 char* rsFunction(char* operand, char* shift_amount){ // rs function
-    char* result = makeOperation(operand, shift_amount, "%s = lshr i32 %s, %s \n");
+    char* result = makeOperation(operand, shift_amount, "%s = ashr i32 %s, %s \n");
     return result;
 }
 
