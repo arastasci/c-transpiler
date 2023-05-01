@@ -5,31 +5,33 @@
 #include "file.h"
 
 const char* printFormat = "call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %s ) \n";
-reg* makeBitshiftOperation(reg* operand, reg* shift_amount, const char* format){
+char* makeBitshiftOperation(char* operand, char* shift_amount, const char* format){
     // write result multiplied by factor2
     // then result = the new reg
     // <result> = <operation> <ty> <op1>, <op2>
-    reg* shifted_temp_result = createRegDefault();
-    fprintf(output_file, format, shifted_temp_result->name, operand->name, shift_amount->name);
+    char* shifted_temp_result = createRegDefault();
+    fprintf(output_file, format, shifted_temp_result, operand, shift_amount);
 //    free(operand);
 //    free(shift_amount);
-    free(operand->name);
     free(operand);
-    free(shift_amount->name);
     free(shift_amount);
     return shifted_temp_result;
 }
 
-reg* makeLeftRotateOperation(reg* operand, reg* rotate_amount, const char* format){
-    reg* temp_rotate1 = createRegDefault();
-    reg* temp_rotate2 = createRegDefault();
-    reg* temp_sub = createRegDefault();
-    reg* rotated_temp_result = createRegDefault();
+char* makeLeftRotateOperation(char* operand, char* rotate_amount){
+    const char* format =     "%s = sub i32 32, %s\n"
+                             "%s = lshr i32 %s, %s\n"
+                             "%s = shl i32 %s, %s\n"
+                             "  %s = or i32 %s, %s\n";
+    char* temp_rotate1 = createRegDefault();
+    char* temp_rotate2 = createRegDefault();
+    char* temp_sub = createRegDefault();
+    char* rotated_temp_result = createRegDefault();
     fprintf(output_file, format, 
-    temp_sub->name, rotate_amount->name,
-    temp_rotate1->name, operand->name, temp_sub->name ,
-    temp_rotate2->name, operand->name, rotate_amount->name ,
-    rotated_temp_result->name, temp_rotate1->name, temp_rotate2->name);
+    temp_sub, rotate_amount,
+    temp_rotate1, operand, temp_sub ,
+    temp_rotate2, operand, rotate_amount ,
+    rotated_temp_result, temp_rotate1, temp_rotate2);
 //    free(operand);
 //    free(rotate_amount);
 
@@ -37,36 +39,30 @@ reg* makeLeftRotateOperation(reg* operand, reg* rotate_amount, const char* forma
     // %rotate1 = lshr i32 %val1, temp_sub 
     // %rotate2 = shl i32 %val1, %val2
     // %rotated = or i32 %rotate1, %rotate2
-    free(operand->name);
     free(operand);
-    free(rotate_amount->name);
     free(rotate_amount);
-    free(temp_rotate1->name);
     free(temp_rotate1);
-    free(temp_rotate2->name);
     free(temp_rotate2);
 
     return rotated_temp_result;
 }
-reg* makeRightRotateOperation(reg* operand, reg* rotate_amount, const char* format){
-    reg* temp_rotate1 = createRegDefault();
-    reg* temp_rotate2 = createRegDefault();
-    reg* temp_sub = createRegDefault();
-    reg* rotated_temp_result = createRegDefault();
+char* makeRightRotateOperation(char* operand, char* rotate_amount){
+    const char* format =  "%s = lshr i32 %s, %s\n"
+                          "%s = sub i32 32, %s\n"
+                          "%s = shl i32 %s, %s\n"
+                          "%s = or i32 %s, %s\n";
+    char* temp_rotate1 = createRegDefault();
+    char* temp_rotate2 = createRegDefault();
+    char* temp_sub = createRegDefault();
+    char* rotated_temp_result = createRegDefault();
     fprintf(output_file, format, 
-    temp_rotate1->name, operand->name, rotate_amount->name ,
-    temp_sub->name, rotate_amount->name,
-    temp_rotate2->name, operand->name, temp_sub->name ,
-    rotated_temp_result->name, temp_rotate1->name, temp_rotate2->name);
-    free(operand->name);
+    temp_rotate1, operand, rotate_amount ,
+    temp_sub, rotate_amount,
+    temp_rotate2, operand, temp_sub ,
+    rotated_temp_result, temp_rotate1, temp_rotate2);
     free(operand);
-    free(rotate_amount->name);
     free(rotate_amount);
-    free(temp_rotate1->name);
-    free(temp_rotate1);
-    free(temp_rotate2->name);
     free(temp_rotate2);
-    free(temp_sub->name);
     free(temp_sub);
 
     // %rotate1 = lshr i32 %val1, %val2
@@ -76,36 +72,30 @@ reg* makeRightRotateOperation(reg* operand, reg* rotate_amount, const char* form
     return rotated_temp_result;
 }
 
-reg* xorFunction(reg* operand1, reg* operand2){ // xor function
-    // reg* new_reg = createRegDefault();
+char* xorFunction(char* operand1, char* operand2){ // xor function
+    // char* new_reg = createRegDefault();
     // // TODO: xor operands and store it in new_reg - do this for all binary-unary funcs
-    // fprintf(output_file, "%s = xor i32 %s, %s \n",new_reg->name, operand1->name, operand2->name);
+    // fprintf(output_file, "%s = xor i32 %s, %s \n",new_reg, operand1, operand2);
 
-    reg* result = makeBitshiftOperation(operand1, operand2, "%s = xor i32 %s, %s \n");
+    char* result = makeBitshiftOperation(operand1, operand2, "%s = xor i32 %s, %s \n");
     return result;
 }
 
-reg* lsFunction(reg* operand, reg* shift_amount){ // ls function
-    reg* result = makeBitshiftOperation(operand, shift_amount, "%s = shl i32 %s, %s \n");
+char* lsFunction(char* operand, char* shift_amount){ // ls function
+    char* result = makeBitshiftOperation(operand, shift_amount, "%s = shl i32 %s, %s \n");
     return result;
 }
 
-reg* rsFunction(reg* operand, reg* shift_amount){ // rs function
-    reg* result;
+char* rsFunction(char* operand, char* shift_amount){ // rs function
+    char* result;
     result = makeBitshiftOperation(operand, shift_amount, "%s = lshr i32 %s, %s \n");
     return result;
 }
 
-reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
-    reg* temp_rotate1 = createRegDefault();
-    reg* temp_rotate2 = createRegDefault();
-    reg* temp_sub = createRegDefault();
-    reg* result = makeLeftRotateOperation(
-            operand, rotate_amount,
-    "%s = sub i32 32, %s\n"
-    "%s = lshr i32 %s, %s\n"
-    "%s = shl i32 %s, %s\n"
-    "  %s = or i32 %s, %s\n");
+char* lrFunction(char* operand, char* rotate_amount){ // lr function
+
+    char* result = makeLeftRotateOperation(
+            operand, rotate_amount);
     // %temp_sub = sub i32 32, %val2
     // %rotate1 = lshr i32 %val1, temp_sub 
     // %rotate2 = shl i32 %val1, %val2
@@ -113,47 +103,30 @@ reg* lrFunction(reg* operand, reg* rotate_amount){ // lr function
     return result;
 }
 
-reg* rrFunction(reg* operand, reg* rotate_amount){ // rr function
-    reg* temp_rotate1 = createRegDefault();
-    reg* temp_rotate2 = createRegDefault();
-    reg* temp_sub = createRegDefault();
-    reg* result = makeRightRotateOperation(
-            operand, rotate_amount,
-            "%s = lshr i32 %s, %s\n"
-            "%s = sub i32 32, %s\n"
-            "%s = shl i32 %s, %s\n"
-            "%s = or i32 %s, %s\n"
-            );
-    // %rotate1 = lshr i32 %val1, %val2
-    // %temp_sub i32 32, %val2
-    // %rotate2 = shl i32 %val1, %temp_sub 
-    // %rotated = or i32 %rotate1, %rotate2
+char* rrFunction(char* operand, char* rotate_amount){ // rr function
+
+    char* result = makeRightRotateOperation(operand, rotate_amount);
     return result;
 }
 
-reg* makeOperation(reg* result, reg* term, const char* format){
+char* makeOperation(char* result, char* term, const char* format){
 
     // write result multiplied by factor2
     // then result = the new reg
     // <result> = <operation> <ty> <op1>, <op2>
-    reg* temp_result = createRegDefault();
-    fprintf(output_file, format, temp_result->name, result->name, term->name);
-    free(term->name);
+    char* temp_result = createRegDefault();
+    fprintf(output_file, format, temp_result, result, term);
     free(term);
-    free(result->name);
     free(result);
 
-
-
-// TODO: free the memory goddzayyummit...
     return temp_result;
 }
 
-reg* parseBinaryFunction(const char* operand_symbol){ // binary functions
+char* parseBinaryFunction(const char* operand_symbol){ // binary functions
     matchToken(LEFT_PAREN);
-    reg* operand1 = parseBitwiseOrExpression();
+    char* operand1 = parseBitwiseOrExpression();
     matchToken(SEPARATOR);
-    reg* operand2 = parseBitwiseOrExpression();
+    char* operand2 = parseBitwiseOrExpression();
     matchToken(RIGHT_PAREN);
 
     if(strncmp(operand_symbol,"xor",3) == 0){
@@ -176,23 +149,23 @@ reg* parseBinaryFunction(const char* operand_symbol){ // binary functions
     return 0; // impossible
 }
 
-reg* parseUnaryFunction(){ // not function
+char* parseUnaryFunction(){ // not function
     matchToken(LEFT_PAREN);
 
-    reg* res = parseBitwiseOrExpression();
+    char* res = parseBitwiseOrExpression();
    // res = res ^ -1;
     // TODO: find not op and do that :D
-    reg* temp_res = createRegDefault();
-    fprintf(output_file,"%s = xor i32 %s, -1 \n", temp_res->name,res->name);
+    char* temp_res = createRegDefault();
+    fprintf(output_file,"%s = xor i32 %s, -1 \n", temp_res,res);
     matchToken(RIGHT_PAREN);
     return temp_res;
 }
-reg* parseFactor(){
+char* parseFactor(){
     token t = current_token;
-    // reg* new_reg = createRegDefault();
+    // char* new_reg = createRegDefault();
     if(t.type == INTEGER){
         matchToken(INTEGER);
-        reg* int_reg = createRegInteger(t.symbol);
+        char* int_reg = createRegInteger(t.symbol);
         return int_reg;
     }
     else if(t.type == IDENTIFIER){
@@ -206,7 +179,7 @@ reg* parseFactor(){
         else{
             // load the var
 
-            return loadVar(&var->var_reg);
+            return loadVar(var->reg);
         }
     }
     else if(t.type == STR_OPERATOR_BINARY){
@@ -220,7 +193,7 @@ reg* parseFactor(){
     }
     else if (t.type == LEFT_PAREN){
         matchToken(LEFT_PAREN);
-        reg* res = parseBitwiseOrExpression();
+        char* res = parseBitwiseOrExpression();
         matchToken(RIGHT_PAREN);
         return res;
     }
@@ -229,9 +202,9 @@ reg* parseFactor(){
     // printf("factor not parsed in line 99. token error\n");
     return createRegDefault();
 }
-reg* parseTerm(){
+char* parseTerm(){
 
-    reg* result = parseFactor();  // first factor to be multiplied
+    char* result = parseFactor();  // first factor to be multiplied
     while(current_token.type == OPERATOR_MULTIPLICATIVE){
         token t = current_token;
         matchToken(OPERATOR_MULTIPLICATIVE);
@@ -250,8 +223,8 @@ reg* parseTerm(){
     return result;
 }
 
-reg* parseExpression(){
-    reg* result = parseTerm(); // first term to be multiplied or divided
+char* parseExpression(){
+    char* result = parseTerm(); // first term to be multiplied or divided
     while(token_index < token_count && current_token.type == OPERATOR_ADDITIVE){    // add or subtract (lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_ADDITIVE);
@@ -265,23 +238,23 @@ reg* parseExpression(){
     }
     return result;
 }
-reg* parseVariable(){  // returns the variable pointer
+char* parseVariable(){  // returns the variable pointer
     token t = current_token;
     matchToken(IDENTIFIER);
     variable *var = find(t.symbol); // check if the variable is in the hashmap
     if(var == NULL){
-        reg* inserted_var = &insert(t.symbol)->var_reg;
-        fprintf(output_file,"%s = alloca i32 \n", inserted_var->name);
+        char* inserted_var = insert(t.symbol)->reg;
+        fprintf(output_file,"%s = alloca i32 \n", inserted_var);
         return inserted_var; // if not, insert it and return the pointer
 
     }
     else{
-        return &var->var_reg; // if it is, return the pointer
+        return var->reg; // if it is, return the pointer
     }
 }
 
-reg* parseBitwiseAndExpression(){
-    reg* result = parseExpression();  // first expression to be bitwise 'and'ed
+char* parseBitwiseAndExpression(){
+    char* result = parseExpression();  // first expression to be bitwise 'and'ed
     while (token_index < token_count && strcmp(current_token.symbol, "&")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
         matchToken(OPERATOR_BITWISE);
@@ -289,8 +262,8 @@ reg* parseBitwiseAndExpression(){
     }
     return result;
 };
-reg* parseBitwiseOrExpression(){
-    reg* result = parseBitwiseAndExpression();  // first (bitwise and expression) to be bitwise 'or'ed
+char* parseBitwiseOrExpression(){
+    char* result = parseBitwiseAndExpression();  // first (bitwise and expression) to be bitwise 'or'ed
 
     while (token_index < token_count && strcmp(current_token.symbol, "|")==0){    // bitwise 'or' and 'and' (second lowest precedency in the grammar)
         token t = current_token;
@@ -303,14 +276,14 @@ reg* parseBitwiseOrExpression(){
 
 void parseAssignment(){
     bool justInitialized = find(current_token.symbol) == NULL;
-    reg* var = parseVariable();
+    char* var = parseVariable();
     matchToken(ASSIGNMENT);
-    reg* response = parseBitwiseOrExpression(); // get the value of the (bitwise or expression)
+    char* response = parseBitwiseOrExpression(); // get the value of the (bitwise or expression)
     if(!has_error && token_index == token_count){
         storeInVar(var, response);
     }
     else{
-        if(justInitialized) var->name = ""; // delete variable from the array if there is an error
+        if(justInitialized) var = ""; // delete variable from the array if there is an error
     }
 }
 
@@ -319,10 +292,10 @@ void parseStatement(){  // two types of statements: assignment and bitwise or ex
         parseAssignment(); // assigns the rhs expr to lhs variable
     }
     else if(token_count != 0){
-        reg* result = parseBitwiseOrExpression(); // evaluates the (bitwise or expression)
+        char* result = parseBitwiseOrExpression(); // evaluates the (bitwise or expression)
         if(!has_error && token_index == token_count){ // if there is no error and all tokens are consumed
             // TODO: write the statement that calls printf from llvm
-            fprintf(output_file, printFormat, result->name);
+            fprintf(output_file, printFormat, result);
         }
         else{
             // printf("Error on line %d!\n",line_count); // if there is an error or there are unconsumed tokens

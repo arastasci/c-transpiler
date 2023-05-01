@@ -9,7 +9,7 @@
 
 
 typedef struct s_variable{
-    reg var_reg;
+    char* reg;
     const char* name;
 } variable;
 

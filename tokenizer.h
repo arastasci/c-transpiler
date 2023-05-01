@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-#define MAX_TOKEN_LENGTH 256
+#define MAX_TOKEN_LENGTH 257
 #define MAX_TOKEN_COUNT 128
 typedef enum e_token_type {
     OPERATOR_ADDITIVE,   // +, -
@@ -28,7 +28,7 @@ typedef struct s_token  // token struct
 {
     int id;
     token_type type;
-    char *symbol;
+    char symbol[MAX_TOKEN_LENGTH];
 } token;
 extern token* token_array;
 
