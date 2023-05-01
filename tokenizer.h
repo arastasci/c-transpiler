@@ -28,7 +28,7 @@ typedef struct s_token  // token struct
 {
     int id;
     token_type type;
-    char symbol[MAX_TOKEN_LENGTH];
+    char* symbol;
 } token;
 extern token* token_array;
 

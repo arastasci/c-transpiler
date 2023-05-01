@@ -53,7 +53,6 @@ int getToken(char* input, token* t, bool* exit_early){
     if (input[i] == '\0' || input[i] == '\n') { // if the input is empty, return
         t->type = ERROR;
         *exit_early = true;
-        free(symbol);
         return 0;
     }
 
@@ -62,60 +61,60 @@ int getToken(char* input, token* t, bool* exit_early){
 
     else if (input[i] == '+') {
         t->type = OPERATOR_ADDITIVE;
-        strcpy(t->symbol, "+");
+        t->symbol = "+";
         i++;
     }
 
     else if (input[i] == '-') {
         t->type = OPERATOR_ADDITIVE;
-        strcpy(t->symbol, "-");
+        t->symbol = "-";
         i++;
     }
     else if (input[i] == '*') {
         t->type = OPERATOR_MULTIPLICATIVE;
-        strcpy(t->symbol, "*");
+        t->symbol = "*";
         i++;
     }
     else if (input[i] == '/') {
         t->type = OPERATOR_MULTIPLICATIVE;
-        strcpy(t->symbol, "/");
+        t->symbol = "/";
         i++;
     }
     else if (input[i] == '%') {
         t->type = OPERATOR_MULTIPLICATIVE;
-        strcpy(t->symbol, "%");
+        t->symbol = "%";
         i++;
     }
 
     else if (input[i] == '&') {
         t->type = OPERATOR_BITWISE;
-        strcpy(t->symbol, "&");
+        t->symbol = "&";
         i++;
     }
     else if (input[i] == '|') {
         t->type = OPERATOR_BITWISE;
-        strcpy(t->symbol, "|");
+        t->symbol = "|";
         i++;
     }
     #pragma endregion
     else if (input[i] == ','){
         t->type = SEPARATOR;
-        strcpy(t->symbol, ",");
+        t->symbol = ",";
         i++;
     }
     else if (input[i] == '(') {
         t->type = LEFT_PAREN;
-        strcpy(t->symbol, "(");
+        t->symbol = "(";
         i++;
     }
     else if (input[i] == ')') {
         t->type = RIGHT_PAREN;
-        strcpy(t->symbol, ")");
+        t->symbol = ")";
         i++;
     }
     else if (input[i] == '=') {
         t->type = ASSIGNMENT;
-        strcpy(t->symbol, "=");
+        t->symbol = "=";
         i++;
     }
     else if (isdigit(input[i])) {   // if the input is a digit, determine if it is an integer iterating and get the value
@@ -127,7 +126,7 @@ int getToken(char* input, token* t, bool* exit_early){
         }
         symbol[j] = '\0';   // null terminate the string
 
-        strcpy(t->symbol, symbol);
+        t->symbol = symbol;
 
     }
     else if (isalpha(input[i])) {   // if the input is a letter, determine if it is an identifier or a keyword
@@ -139,8 +138,7 @@ int getToken(char* input, token* t, bool* exit_early){
         }
         symbol[j] = '\0';
 
-        strcpy(t->symbol, symbol);
-
+        t->symbol = symbol;
 
 
         t->type = determineTokenTypeOfAlpha(symbol);
@@ -148,7 +146,6 @@ int getToken(char* input, token* t, bool* exit_early){
     else{
         raiseTokenError();
     }
-    free(symbol);
     token_array[t->id] = *t;
     return i;
 }

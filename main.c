@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
         // printf("%s", input);
         has_error = false;
         tokenize(input);
-         //printTokens(); // for debug purposes
+        //printTokens(); // for debug purposes
         parseStatement();
 
         if(has_error){
