@@ -1,6 +1,6 @@
  x = 1
- y = x + 3 % 4
- z = x * y * y*y % 64
+ y = x + 3 
+ z = x * y * y*y 
  z
 64
  qqq = xor(131, 198)

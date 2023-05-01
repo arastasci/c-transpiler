@@ -18,7 +18,11 @@ char* makeBitshiftOperation(char* operand, char* shift_amount, const char* forma
     return shifted_temp_result;
 }
 
-char* makeLeftRotateOperation(char* operand, char* rotate_amount, const char* format){
+char* makeLeftRotateOperation(char* operand, char* rotate_amount){
+    const char* format =     "%s = sub i32 32, %s\n"
+                             "%s = lshr i32 %s, %s\n"
+                             "%s = shl i32 %s, %s\n"
+                             "  %s = or i32 %s, %s\n";
     char* temp_rotate1 = createRegDefault();
     char* temp_rotate2 = createRegDefault();
     char* temp_sub = createRegDefault();
@@ -42,7 +46,11 @@ char* makeLeftRotateOperation(char* operand, char* rotate_amount, const char* fo
 
     return rotated_temp_result;
 }
-char* makeRightRotateOperation(char* operand, char* rotate_amount, const char* format){
+char* makeRightRotateOperation(char* operand, char* rotate_amount){
+    const char* format =  "%s = lshr i32 %s, %s\n"
+                          "%s = sub i32 32, %s\n"
+                          "%s = shl i32 %s, %s\n"
+                          "%s = or i32 %s, %s\n";
     char* temp_rotate1 = createRegDefault();
     char* temp_rotate2 = createRegDefault();
     char* temp_sub = createRegDefault();
@@ -85,15 +93,9 @@ char* rsFunction(char* operand, char* shift_amount){ // rs function
 }
 
 char* lrFunction(char* operand, char* rotate_amount){ // lr function
-    char* temp_rotate1 = createRegDefault();
-    char* temp_rotate2 = createRegDefault();
-    char* temp_sub = createRegDefault();
+
     char* result = makeLeftRotateOperation(
-            operand, rotate_amount,
-    "%s = sub i32 32, %s\n"
-    "%s = lshr i32 %s, %s\n"
-    "%s = shl i32 %s, %s\n"
-    "  %s = or i32 %s, %s\n");
+            operand, rotate_amount);
     // %temp_sub = sub i32 32, %val2
     // %rotate1 = lshr i32 %val1, temp_sub 
     // %rotate2 = shl i32 %val1, %val2
@@ -102,20 +104,8 @@ char* lrFunction(char* operand, char* rotate_amount){ // lr function
 }
 
 char* rrFunction(char* operand, char* rotate_amount){ // rr function
-    char* temp_rotate1 = createRegDefault();
-    char* temp_rotate2 = createRegDefault();
-    char* temp_sub = createRegDefault();
-    char* result = makeRightRotateOperation(
-            operand, rotate_amount,
-            "%s = lshr i32 %s, %s\n"
-            "%s = sub i32 32, %s\n"
-            "%s = shl i32 %s, %s\n"
-            "%s = or i32 %s, %s\n"
-            );
-    // %rotate1 = lshr i32 %val1, %val2
-    // %temp_sub i32 32, %val2
-    // %rotate2 = shl i32 %val1, %temp_sub 
-    // %rotated = or i32 %rotate1, %rotate2
+
+    char* result = makeRightRotateOperation(operand, rotate_amount);
     return result;
 }
 
@@ -129,9 +119,6 @@ char* makeOperation(char* result, char* term, const char* format){
     free(term);
     free(result);
 
-
-
-// TODO: free the memory goddzayyummit...
     return temp_result;
 }
 

@@ -1,5 +1,5 @@
-advcalcir: main.o hash.o tokenizer.o parser.o reg.o file.o
-	gcc main.o hash.o tokenizer.o parser.o reg.o file.o -o advcalcir
+advcalc2ir: main.o hash.o tokenizer.o parser.o reg.o file.o
+	gcc main.o hash.o tokenizer.o parser.o reg.o file.o -o advcalc2ir
 
 main.o: main.c file.h
 	gcc -c main.c
@@ -21,4 +21,4 @@ reg.o: reg.c reg.h
 file.o: file.c file.h
 	gcc -c file.c
 clean:
-	rm *.o advcalcir
+	rm *.o advcalc2ir
