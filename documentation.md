@@ -15,6 +15,23 @@ It might be beneficial for the reader to know the definitions of the following t
 -   Static Single Assignment (SSA for short): a property of an intermediate representation that requires each variable to be assigned exactly once and defined before it is used. [2]
 -   Register: the data structure that holds a value in intermediate representation languages.
 
+# 2 Program Interface
+
+The program is written in C and that requires the user who has the source code to first compile the program. For that there is a Makefile ready for use in the folder, so opening a new terminal in the root directory and running `make` will suffice. Compilation outputs the executable file `advcalc2ir` which takes a command line argument, that is the input file `{file_name}.adv`. So the executable can be run by the command `./advcalc2ir {file_name}.adv` and that, if there are no errors in the `.adv` file, outputs `{file_name}.ll` (Note that the file name has only its extension changed). The `.ll` file contains the LLVM code translated from AdvCalc++. If you have LLVM tools installed on your machine, you can run `lli {file_name}.ll` to run the file and see the outputs printed in standard output. You can also run the following commands to generate an executable from the `.ll` file:
+
+```
+$ llc file.ll -o file.s
+$ clang file.s -o myexec
+$ ./myexec
+```
+
+To clear the compiled program files and the executable, you can run `make clean`
+
+### 3.1 Validity of statements
+
+The assignment operation's right hand side can be any valid expression of the user's like while the LHS ought to be an identifier. If there is an error in this syntax, the statement is invalidated and `"Error in line ${line_number}!"` is printed to standard output and the AdvCalc++ program becomes invalid and the output ".ll" file is not generated(rather is first generated but then removed).
+As to the validity of the expressions, the precedence of the operations determine the expression's next expected token. If the token is not of the expected type, the expression is deemed invalid. Parantheses must abide by the stack rule. For the precedence of the operations, you can take [C's operation precedence table](https://en.cppreference.com/w/c/language/operator_precedence) as reference.
+
 ## Implementation Details
 
 ###Tokenizing
@@ -71,7 +88,9 @@ In the AdvCalc++ transpiler, the return value from parse functions isn't an inte
 The return value is char*, which is a string that contains the name of the register that holds the descendant expression's (namely a "bitwise and" expression) result. It is matched with the operator and the makeOperation function which takes the result of the first called function is called.
 Then the result of the second called function and generates the LLVM IR code for the operation. In the makeOperation function, a new register is created and the LLVM code which instructs this new register to store the result of the operation in that register is printed in the ".ll" file. This new register is created to comply with the SSA rule of LLVM. The new register is named as reg_i where i is the `current_reg_id` which is incremented everytime a new register is created. This ensures that the names of registers are unique. Then the char* that makeOperation returns which is the variable storing the result of the operation is returned. Below is the code of the `parseBitwiseOrExpression` function:
 
-'''
+```
+// in parser.c
+
 char* parseBitwiseOrExpression(){
 char* result = parseBitwiseAndExpression(); // first (bitwise and expression) to be bitwise 'or'ed
 
@@ -91,6 +110,10 @@ free(term);
 free(result);
 return temp_result;
 }
+```
+
+```
+// in reg.c
 
 char* createRegDefault(){
 char* reg = malloc(128 \* sizeof(char));
@@ -98,7 +121,7 @@ sprintf(reg,"%%reg\_%d", current_reg_id);
 current_reg_id++;
 return reg;
 }
-'''
+```
 
 The same process applies for other parse functions, one can look at the source code for further inspection.
 
@@ -108,10 +131,37 @@ In this project, hashing is not used for storing the values but instead only sto
 
 ###LLVM IR Code Generation
 
-Writing functions for some operations to generate the LLVM IR code became cumbersome. For example bit rotating operations needed multiple lines and register creations. So two special functions for rotations are defined.
+Writing functions for some operations to generate the LLVM IR code became cumbersome. For example, bit rotating operations needed multiple lines and register creations. So two special functions for rotation operations are defined. LLVM functions were not preferred for this operation but rather boilerplate code was generated. This choice was made simply because the development team did not want to further complicate the code.
 
-'''c
+### 4.4 Error Handling
 
+We defined the `matchToken` function to check if the current token is the expected token. If it is not, it returns an error.
+This works because the expected token is the only possible token for the statement according to the BNF and the recursive hierarchy. In other words, the grammar of our BNF is unambiguous.
+We also defined a `raiseTokenError` function to raise error if the token is not one of the expected types in `parseFactor`.
+This way also ensured our hierarchy worked properly.
 Source:
+
+## Appendix
+
+### BNF
+
+Below is the Extended Backus-Naur form for AdvCalc++.
+
+```
+<Statement> ::= <Assignment> | <BitwiseOrExpression>
+<Assignment> ::= <Variable> "=" <BitwiseOrExpression>
+<BitwiseOrExpression> ::= <BitwiseAndExpression> ("|" <BitwiseAndExpression>)*
+<BitwiseAndExpression> ::= <Expression> ("&" <Expression>)*
+<Expression> ::= <Term> (("+"|"-") <Term>)*
+<Term> ::= <Factor> (("*" | "/" | "%") <Factor>)
+<Factor> ::= <Variable> | <integer> | <UnaryFunction> | <BinaryFunction> | "(" <BitwiseOrExpression> ")"
+<Variable> ::= <identifier>
+<UnaryFunction> ::= "not" "(" <BitwiseOrExpression> ")"
+<BinaryFunction> ::= <BinaryFunctionOperator>  "(" <BitwiseOrExpression> "," <BitwiseOrExpression> ")"
+<BinaryFunctionOperator> ::= "xor" | "lr" | "rr" | "ls" | "rs"
+<integer> ::= <digit>+
+<identifier> ::= <letter> (<letter>)*
+```
+
 [1]: Wikipedia - https://en.wikipedia.org/wiki/Intermediate_representation
 [2]: Wikipedia - https://en.wikipedia.org/wiki/Static_single-assignment_form
