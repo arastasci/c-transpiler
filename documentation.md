@@ -1,6 +1,6 @@
-# #DOCUMENTATION
+# DOCUMENTATION
 
-## ##Introduction
+## Introduction
 
 The goal of this project is to create a transpiler that can convert AdvCalc++ assignment statements and expressions into LLVM IR code to calculate and output the given statements. The transpiler is written in C and is able to handle the following features:
 
@@ -15,7 +15,7 @@ It might be beneficial for the reader to know the definitions of the following t
 -   Static Single Assignment (SSA for short): a property of an intermediate representation that requires each variable to be assigned exactly once and defined before it is used. [2]
 -   Register: the data structure that holds a value in intermediate representation languages.
 
-# 2 Program Interface and Execution
+## 2 Program Interface and Execution
 
 The program is written in C and that requires the user who has the source code to first compile the program. For that there is a Makefile ready for use in the folder, so opening a new terminal in the root directory and running `make` will suffice. Compilation outputs the executable file `advcalc2ir` which takes a command line argument, that is the input file `{file_name}.adv`. So the executable can be run by the command `./advcalc2ir {file_name}.adv` and that, if there are no errors in the `.adv` file, outputs `{file_name}.ll` (Note that the file name has only its extension changed). The `.ll` file contains the LLVM code translated from AdvCalc++. If you have LLVM tools installed on your machine, you can run `lli {file_name}.ll` to run the file and see the outputs printed in standard output. You can also run the following commands to generate an executable from the `.ll` file:
 
@@ -27,7 +27,7 @@ $ ./myexec
 
 To clear the compiled program files and the executable, you can run `make clean`.
 
-### 3.1 Validity of statements
+## 3 Validity of statements
 
 The assignment operation's right hand side can be any valid expression of the user's like while the LHS ought to be an identifier. If there is an error in this syntax, the statement is invalidated and `"Error in line ${line_number}!"` is printed to standard output and the AdvCalc++ program becomes invalid and the output ".ll" file is not generated(rather is first generated but then removed).
 As to the validity of the expressions, the precedence of the operations determine the expression's next expected token. If the token is not of the expected type, the expression is deemed invalid. Parantheses must abide by the stack rule. For the precedence of the operations, you can take [C's operation precedence table](https://en.cppreference.com/w/c/language/operator_precedence) as reference.

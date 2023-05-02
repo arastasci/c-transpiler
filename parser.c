@@ -291,6 +291,7 @@ void parseAssignment(){
             strcpy(s_var-> name , "");
             strcpy(s_var->reg, "");
         }
+        raiseTokenError();
     }
     free(response);
 }
