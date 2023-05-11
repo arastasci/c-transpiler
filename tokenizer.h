@@ -19,7 +19,6 @@ typedef enum e_token_type {
     IDENTIFIER, // a, b, c, ...
     ASSIGNMENT, // =
     INTEGER,   // 1, 2, 3, ...
-    COMMENT,  // % ...
     SEPARATOR, // `,`
     ERROR     // invalid token
 } token_type;
@@ -28,13 +27,12 @@ typedef struct s_token  // token struct
 {
     int id;
     token_type type;
-    char* symbol;
+    char symbol[MAX_TOKEN_LENGTH];
 } token;
-extern token* token_array;
+extern token token_array[128];
 
 token getNextToken();
-void allocateArrayMemory();
-void freeArrayMemory();
+void resetTokenArray();
 void matchToken(token_type tokenType);
 extern bool has_error;
 extern int token_count;

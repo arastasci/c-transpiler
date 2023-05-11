@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
     char* input_file_name = argv[1];
-    char no_extension_name [1000];
+    char no_extension_name [990];
     strcpy(no_extension_name, input_file_name);
     strtok(no_extension_name,".");
     char output_file_name [1000];
@@ -21,7 +21,6 @@ int main(int argc, char *argv[]){
     output_file = fopen(output_file_name, "w+");
 
     char input [258];
-    allocateArrayMemory(); // allocate token array mem
 
     current_reg_id = 0;
     initializeHashMap();
@@ -36,7 +35,7 @@ int main(int argc, char *argv[]){
         // printf("%s", input);
         has_error = false;
         tokenize(input);
-        //printTokens(); // for debug purposes
+        // printTokens(); // for debug purposes
         parseStatement();
 
         if(has_error){
@@ -44,14 +43,12 @@ int main(int argc, char *argv[]){
             has_any_error = true;
         }
 
-        freeArrayMemory(); // free token array mem
+        resetTokenArray(); // free token array mem
         line_count++;
     }
     write_end();
 
-
     if(has_any_error){
-        // TODO: delete ll file
         remove(output_file_name);
     }
     else{

@@ -9,8 +9,8 @@
 
 
 typedef struct s_variable{
-    char* reg;
-    const char* name;
+    char reg[260];
+    char name[260];
 } variable;
 
 void initializeHashMap();
