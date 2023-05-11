@@ -5,22 +5,12 @@
 #include "file.h"
 
 const char* printFormat = "call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @print.str, i32 0, i32 0), i32 %s ) \n";
-//char* makeBitshiftOperation(char* operand, char* shift_amount, const char* format){
-//    // write result multiplied by factor2
-//    // then result = the new reg
-//    // <result> = <operation> <ty> <op1>, <op2>
-//    char* shifted_temp_result = createRegDefault();
-//    fprintf(output_file, format, shifted_temp_result, operand, shift_amount);
-////    free(operand);
-////    free(shift_amount);
-//    free(operand);
-//    free(shift_amount);
-//    return shifted_temp_result;
-//}
+
+
 
 char* makeLeftRotateOperation(char* operand, char* rotate_amount){
     const char* format =     "%s = sub i32 32, %s\n"
-                             "%s = ashr i32 %s, %s\n"
+                             "%s = lshr i32 %s, %s\n"
                              "%s = shl i32 %s, %s\n"
                              "  %s = or i32 %s, %s\n";
     char* temp_rotate1 = createRegDefault();
@@ -47,7 +37,7 @@ char* makeLeftRotateOperation(char* operand, char* rotate_amount){
     return rotated_temp_result;
 }
 char* makeRightRotateOperation(char* operand, char* rotate_amount){
-    const char* format =  "%s = ashr i32 %s, %s\n"
+    const char* format =  "%s = lshr i32 %s, %s\n"
                           "%s = sub i32 32, %s\n"
                           "%s = shl i32 %s, %s\n"
                           "%s = or i32 %s, %s\n";
